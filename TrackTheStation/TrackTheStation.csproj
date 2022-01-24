@@ -139,6 +139,11 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\ISSicon.scale-100.png" />
+    <Content Include="Assets\ISSicon.scale-125.png" />
+    <Content Include="Assets\ISSicon.scale-150.png" />
+    <Content Include="Assets\ISSicon.scale-200.png" />
+    <Content Include="Assets\ISSicon.scale-400.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
