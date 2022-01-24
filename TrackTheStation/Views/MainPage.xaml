@@ -10,7 +10,7 @@
 
     <Grid>
 
-        <NavigationView x:Name="navView" SelectionChanged="navView_SelectionChanged" Loaded="navView_Loaded">
+        <NavigationView x:Name="navView" SelectionChanged="navView_SelectionChanged" Loaded="navView_Loaded" IsBackButtonVisible="Collapsed">
             <NavigationView.MenuItems>
                 <NavigationViewItem Icon="World" Content="Track the Station" Tag="TrackTheStation.TrackStationPage" />
                 <NavigationViewItem Icon="People" Content="Crew on board" Tag="TrackTheStation.CrewPage" />
