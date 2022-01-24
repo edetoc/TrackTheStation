@@ -5,10 +5,26 @@
     xmlns:local="using:TrackTheStation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:maps="using:Windows.UI.Xaml.Controls.Maps"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="track page"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+
+        </Grid.RowDefinitions>
+        <maps:MapControl      
+                    Grid.Row="0"
+                    MapProjection="WebMercator"
+                    Name="myMapControl"                                              
+                    ZoomLevel="2.5"
+                    MapServiceToken="28j7l8ZEateUcAk258oP~sBrfu72-ipTYZ1L7203X_A~AhUpmqu2C56dYly6JoO604jwVO1pAT0pFkizi-bMq5dY4bdQsGz345e02P45_Zsr" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBlock x:Name="myTextBlock" Foreground="Red" VerticalAlignment="Center" />
+            
+        </StackPanel>
     </Grid>
 </Page>

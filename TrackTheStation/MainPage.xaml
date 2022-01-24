@@ -13,6 +13,7 @@
         <NavigationView x:Name="navView" SelectionChanged="navView_SelectionChanged" Loaded="navView_Loaded">
             <NavigationView.MenuItems>
                 <NavigationViewItem Icon="World" Content="Track the Station" Tag="TrackTheStation.TrackStationPage" />
+                <NavigationViewItem Icon="People" Content="Crew on board" Tag="TrackTheStation.CrewPage" />
             </NavigationView.MenuItems>
             <Frame x:Name="contentFrame"/>
         </NavigationView>
