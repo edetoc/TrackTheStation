@@ -15,6 +15,7 @@ using Windows.Storage.Streams;
 using Windows.System.Threading;
 using Windows.UI;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Navigation;
@@ -44,8 +45,7 @@ namespace TrackTheStation
         private Tle _ISSTLE;
 
         private MapIcon _ISSIcon;
-        private MapPolyline _currentOrbitPath;
-        private MapPolyline _nextOrbitPath;
+        private MapPolyline _currentOrbitPath;        
 
         private MapElementsLayer _orbitsLayer;
         private MapElementsLayer _issLayer;
@@ -54,8 +54,12 @@ namespace TrackTheStation
         public TrackStationPage()
         {
 
+            this.InitializeComponent();
+
             _ISSIcon = new MapIcon();
+
             _ISSIcon.Image = RandomAccessStreamReference.CreateFromUri(new Uri("ms-appx:///Assets/ISSicon.png"));
+
             // https://msdn.microsoft.com/en-gb/library/windows/apps/windows.ui.xaml.controls.maps.mapicon.normalizedanchorpoint.aspx
             // 0,0 is upper left corner of the image
             _ISSIcon.NormalizedAnchorPoint = new Point(0.5, 0.5);
@@ -72,13 +76,58 @@ namespace TrackTheStation
 
             };
 
-            this.InitializeComponent();
+        }
 
-            App.Current.Resuming += Current_Resuming;
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+
+            Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
+
+            var bSuccess = await TryGetTLESets();
+
+            if (!bSuccess)
+            {
+                
+                var messageDialog = new MessageDialog("couldn't fetch TLE or not found in local cache", "Couldn't retrieved TLE info");
+
+                await messageDialog.ShowAsync();
+
+                return;
+            }
+
+            var tleList = ParserTLE.ParseFile(Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path,
+                                                        "stations.txt"));
+
+            _ISSTLE = tleList.Find(x => x.getNoradID() == "25544");  // return null if not found, otherwise the TLE for ISS
+
+            myMapControl.Layers.Add(_orbitsLayer);
+            myMapControl.Layers.Add(_issLayer);
+
+            UpdateOrbitPaths(null);
+            UpdateISSPosition(null);
+
+            // start periodic timers  to refresh ISS position  orbit path on Map
+            var updateISSPositionTimer =
+                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
+                                                    TimeSpan.FromSeconds(3));   
+
+            var updateOrbitPathsTimer =
+                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPaths),
+                                                    TimeSpan.FromMinutes(10));
 
         }
 
+        private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            myMapControl.MapProjection = MapProjection.Globe;
+        }
 
+        private void GlobeViewCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            myMapControl.MapProjection = MapProjection.WebMercator;
+        }
+
+        // this code retrieves the TLE from Internet for the ISS
         private async Task<bool> TryGetTLESets()
         {
 
@@ -93,8 +142,6 @@ namespace TrackTheStation
             //Uri uri = new Uri("https://www.celestrak.com/NORAD/elements/stations.txt");
 
             Uri uri = new Uri("https://celestrak.com/satcat/tle.php?CATNR=25544");
-
-
 
             bool needToCheckCache = false;
             bool result = false;
@@ -197,70 +244,57 @@ namespace TrackTheStation
             return result;
 
         }
-
-        private async void Current_Resuming(object sender, object e)
-        {
-            await myMapControl.TrySetViewAsync(_ISSIcon.Location);
-        }
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
-
-            var bSuccess = await TryGetTLESets();
-
-            if (!bSuccess)
-            {
-                // tell user we couldn't fetch TLE or not found in local cache
-                throw new FileNotFoundException();
-            }
-
-            var tleList = ParserTLE.ParseFile(Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path,
-                                                        "stations.txt"));
-
-            _ISSTLE = tleList.Find(x => x.getNoradID() == "25544");  // return null if not found, otherwise the TLE for ISS
-
-            myMapControl.Layers.Add(_orbitsLayer);
-            myMapControl.Layers.Add(_issLayer);
-
-            UpdateOrbitPaths(null);
-            UpdateISSPosition(null);
-
-            // start periodic timer to refresh ISS location on Map
-            var updateISSPositionTimer =
-                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
-                                                    TimeSpan.FromSeconds(3));   // 3 seconds
-
-            var updateOrbitPathsTimer =
-                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPaths),
-                                                    TimeSpan.FromMinutes(10));
-
-        }
+       
 
         private async void UpdateOrbitPaths(ThreadPoolTimer timer)
         {
 
             _startUtc = DateTime.UtcNow;
 
-            var curOrbitSteps = GetOrbitStepsData(_startUtc, _startUtc.AddMinutes(90), ONE_MINUTE_STEP, false);      // current orbit path, step 1 minute            
-            var nextOrbitSteps = GetOrbitStepsData(_startUtc.AddMinutes(90), _startUtc.AddMinutes(180), ONE_MINUTE_STEP, false);     // next orbit path
-
+            var curOrbitSteps = GetOrbitStepsData(_startUtc, _startUtc.AddMinutes(90), ONE_MINUTE_STEP, false);                      // current orbit path, step 1 minute            
+            
             Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.coord).ToArray();
-            Coordinate[] nextOrbitCoords = nextOrbitSteps.Select(step => step.coord).ToArray();
-
-            await Dispatcher.RunAsync(CoreDispatcherPriority.High,
-                 () =>
+            
+            await Dispatcher.RunAsync(CoreDispatcherPriority.High,() =>
                  {
 
                      _currentOrbitPath = GetGeodesicPath(curOrbitCoords, Colors.Red, false);
-                     _nextOrbitPath = GetGeodesicPath(nextOrbitCoords, Colors.Orange, true);
-
+                     
                      _orbitsLayer.MapElements.Clear();
 
                      _orbitsLayer.MapElements.Add(_currentOrbitPath);
-                     _orbitsLayer.MapElements.Add(_nextOrbitPath);
-
+                     
                  });
+
+        }
+
+        private async void UpdateISSPosition(ThreadPoolTimer timer)
+        {
+
+            var issPosNow = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow, 0.0001666667, true);
+
+            var bgp = new BasicGeoposition();
+            bgp.Latitude = issPosNow[0].coord.getLatitude();
+            bgp.Longitude = issPosNow[0].coord.getLongitude();
+
+            var gp = new Geopoint(bgp);
+
+            await Dispatcher.RunAsync(CoreDispatcherPriority.High, async () =>
+                   {
+                       _ISSIcon.Location = gp;
+
+                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].coord.getHeight());
+                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].speed);
+
+                       if (!_issLayer.MapElements.Contains(_ISSIcon))
+                       {
+                           _issLayer.MapElements.Add(_ISSIcon);
+
+                           await myMapControl.TrySetViewAsync(_ISSIcon.Location);
+
+                       }
+
+                   });
 
         }
 
@@ -306,38 +340,6 @@ namespace TrackTheStation
                                         Math.Pow(Math.Abs(vel.z), 2));
 
         }
-
-        private async void UpdateISSPosition(ThreadPoolTimer timer)
-        {
-
-            var issPosNow = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow, 0.0001666667, true);
-
-            var bgp = new BasicGeoposition();
-            bgp.Latitude = issPosNow[0].coord.getLatitude();
-            bgp.Longitude = issPosNow[0].coord.getLongitude();
-
-            var gp = new Geopoint(bgp);
-
-            await Dispatcher.RunAsync(CoreDispatcherPriority.High,
-                   async () =>
-                   {
-                       _ISSIcon.Location = gp;
-
-                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].coord.getHeight());
-                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].speed);
-
-                       if (!_issLayer.MapElements.Contains(_ISSIcon))
-                       {
-                           _issLayer.MapElements.Add(_ISSIcon);
-
-                           await myMapControl.TrySetViewAsync(_ISSIcon.Location);
-
-                       }
-
-                   });
-
-        }
-
 
         // Draw the geodesic path of ISS based on an array of geo positions 
         private MapPolyline GetGeodesicPath(Coordinate[] positions, Color color, bool isDashed)
@@ -443,14 +445,6 @@ namespace TrackTheStation
             return angle * (180 / Math.PI);
         }
 
-        private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            myMapControl.MapProjection = MapProjection.Globe;
-        }
-
-        private void GlobeViewCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            myMapControl.MapProjection = MapProjection.WebMercator;
-        }
+    
     }
 }
