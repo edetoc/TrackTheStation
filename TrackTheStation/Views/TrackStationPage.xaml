@@ -12,46 +12,56 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
+
         <maps:MapControl      
-                    Grid.Row="0"
-                    MapProjection="WebMercator"
-                    Style="Aerial"
-                    Name="myMapControl"                                              
-                    ZoomLevel="2.5"
-                    MapServiceToken="28j7l8ZEateUcAk258oP~sBrfu72-ipTYZ1L7203X_A~AhUpmqu2C56dYly6JoO604jwVO1pAT0pFkizi-bMq5dY4bdQsGz345e02P45_Zsr" />
+                Grid.Row="0"              
+                MapProjection="WebMercator"
+                Style="Aerial"
+                Name="myMapControl"                                              
+                ZoomLevel="2.5"
+                MapServiceToken="28j7l8ZEateUcAk258oP~sBrfu72-ipTYZ1L7203X_A~AhUpmqu2C56dYly6JoO604jwVO1pAT0pFkizi-bMq5dY4bdQsGz345e02P45_Zsr" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="8,0,0,0">
-            
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="35"/>
-                    <RowDefinition Height="35"/>
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="180"/>
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
+        
 
-                <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="Altitude:" VerticalAlignment="Center"/>
-                    <TextBlock Name="AltTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
-                </StackPanel>
-                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="Velocity:" VerticalAlignment="Center"/>
-                    <TextBlock Name="VelocityTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
-                </StackPanel>
-                
-                <CheckBox  Name="GlobeViewCB" 
-                           Grid.Column="1" Grid.RowSpan="2"  
+        <WebView  Grid.Row="0" Name="webView" Width="550" Height="550" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed"/>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Text="Altitude:" VerticalAlignment="Center"/>
+                <TextBlock Name="AltTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+                <TextBlock Text="Velocity:" VerticalAlignment="Center"/>
+                <TextBlock Name="VelocityTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
+            </StackPanel>
+
+            <CheckBox  Name="GlobeViewCB" 
+                           Grid.Row="0"  Grid.Column="1" 
                            Content="Globe view" 
                            IsChecked="False" Checked="GlobeViewCB_Checked" Unchecked="GlobeViewCB_Unchecked" 
                            HorizontalAlignment="Right" 
                            FlowDirection="RightToLeft"/>
-            </Grid>
-            
-        </StackPanel>
+
+            <CheckBox  Name="LiveStreamCB" 
+                           Grid.Row="1"  Grid.Column="1" 
+                           Content="Live stream" 
+                           IsChecked="False" Checked="LiveStreamCB_Checked" Unchecked="LiveStreamCB_Unchecked" 
+                           HorizontalAlignment="Right" 
+                           FlowDirection="RightToLeft"/>
+
+        </Grid>
+
+
     </Grid>
 </Page>

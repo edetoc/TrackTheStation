@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
+using Windows.Media.Core;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Threading;
@@ -36,12 +37,6 @@ namespace TrackTheStation
     public sealed partial class TrackStationPage : Page
     {
       
-        private DateTime _startUtc;
-
-        const int OrbitPeriodInMinutes = 90;
-        const double ONE_MINUTE_STEP = 1;
-        const double THREE_SECONDS_STEP_IN_MIN = 0.05;
-
         private Tle _ISSTLE;
 
         private MapIcon _ISSIcon;
@@ -50,11 +45,51 @@ namespace TrackTheStation
         private MapElementsLayer _orbitsLayer;
         private MapElementsLayer _issLayer;
 
+        private DateTime _startUtc;
+
+        const double ONE_MINUTE_STEP = 1;
+        
 
         public TrackStationPage()
         {
 
             this.InitializeComponent();
+
+        }
+
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
+
+            // Get TLE
+            var bSuccess = await TryGetTLESets();
+
+            if (!bSuccess)
+            {
+                
+                var messageDialog = new MessageDialog("Couldn't retrieve the TLE for the space station", "Error TLE");
+                await messageDialog.ShowAsync();
+
+                return;
+            }
+
+            // Parse TLE. it looks like this :
+
+                  /*
+
+                  Response looks like:
+
+                  ISS (ZARYA)             
+                  1 25544U 98067A   22024.46959583  .00005654  00000-0  10839-3 0  9993
+                  2 25544  51.6445 328.3082 0006842  57.4089  51.6405 15.49611941322892
+
+                  */
+
+            var tleList = ParserTLE.ParseFile(Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path, "stations.txt"));
+
+            _ISSTLE = tleList.Find(x => x.getNoradID() == "25544");  // return null if not found, otherwise the TLE for ISS
+
+
+            // Initializations for Map
 
             _ISSIcon = new MapIcon();
 
@@ -76,43 +111,18 @@ namespace TrackTheStation
 
             };
 
-        }
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-
-            Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
-
-            var bSuccess = await TryGetTLESets();
-
-            if (!bSuccess)
-            {
-                
-                var messageDialog = new MessageDialog("couldn't fetch TLE or not found in local cache", "Couldn't retrieved TLE info");
-
-                await messageDialog.ShowAsync();
-
-                return;
-            }
-
-            var tleList = ParserTLE.ParseFile(Path.Combine(Windows.Storage.ApplicationData.Current.LocalFolder.Path,
-                                                        "stations.txt"));
-
-            _ISSTLE = tleList.Find(x => x.getNoradID() == "25544");  // return null if not found, otherwise the TLE for ISS
-
             myMapControl.Layers.Add(_orbitsLayer);
             myMapControl.Layers.Add(_issLayer);
 
-            UpdateOrbitPaths(null);
+            UpdateOrbitPath(null);
             UpdateISSPosition(null);
-
-            // start periodic timers  to refresh ISS position  orbit path on Map
+            
             var updateISSPositionTimer =
                 ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
                                                     TimeSpan.FromSeconds(3));   
 
             var updateOrbitPathsTimer =
-                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPaths),
+                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
                                                     TimeSpan.FromMinutes(10));
 
         }
@@ -127,24 +137,31 @@ namespace TrackTheStation
             myMapControl.MapProjection = MapProjection.WebMercator;
         }
 
-        // this code retrieves the TLE from Internet for the ISS
+        private void LiveStreamCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+
+            webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
+            webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
+        }
+
+        private void LiveStreamCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+            webView.Navigate(new Uri("about:blank"));
+
+        }
+
+        // this code tries to retrieve the TLE for the ISS from Internet, or from local cache (if no Internet)
         private async Task<bool> TryGetTLESets()
         {
 
-            HttpClient httpClient;
-            CancellationTokenSource cts;
             HttpBaseProtocolFilter filter = new HttpBaseProtocolFilter();
             filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache; // Do not cache the http response
 
-            httpClient = new HttpClient(filter);
-            cts = new CancellationTokenSource();
-
-            //Uri uri = new Uri("https://www.celestrak.com/NORAD/elements/stations.txt");
-
-            Uri uri = new Uri("https://celestrak.com/satcat/tle.php?CATNR=25544");
-
+            var httpClient = new HttpClient(filter);
+            
             bool needToCheckCache = false;
-            bool result = false;
+            bool bTLEfound = false;
 
             if (NetworkHelper.Instance.ConnectionInformation.IsInternetAvailable)
             {
@@ -152,64 +169,24 @@ namespace TrackTheStation
                 try
                 {
 
-                    var response = await httpClient.GetStringAsync(uri).AsTask(cts.Token);
+                    var response = await httpClient.GetStringAsync(new Uri("https://celestrak.com/satcat/tle.php?CATNR=25544"));
 
-                    /*
-
-                    <!doctype html>
-
-                    <html>
-
-                    <head>
-
-                    <title>TLE for NORAD Catalog Number 25544</title>
-
-                    </head>
-
-                    <body>
-
-                        <pre>
-                        ISS (ZARYA)             
-                        1 25544U 98067A   19188.35011131  .00001099  00000-0  26459-4 0  9991
-                        2 25544  51.6438 261.2359 0007187 115.2183 334.7816 15.50962949178380
-
-                        </pre>
-	
-                    </body>
-
-                    </html>
-
-
-                    */
-
-
-
-                    //var document = parser.Parse(response);
-
-                    //var preTag = document.QuerySelector("pre");  // we want content within the pre tag (see above)
+                    Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
 
                     StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
 
                     StorageFile stationsFile = await storageFolder.CreateFileAsync("stations.txt",
                                                                                     CreationCollisionOption.ReplaceExisting);
 
-                    //await FileIO.WriteTextAsync(stationsFile, response);
-
                     await FileIO.WriteTextAsync(stationsFile, response);
 
-                    result = true;
+                    bTLEfound = true;
 
-                }
-                catch (TaskCanceledException)
+                }              
+                catch (Exception)
                 {
-                    //rootPage.NotifyUser("Request canceled.", NotifyType.ErrorMessage);
-                }
-                catch (Exception ex)
-                {
-                    //rootPage.NotifyUser("Error: " + ex.Message, NotifyType.ErrorMessage);
-
+                    
                     needToCheckCache = true;
-
                 }
             }
             else
@@ -227,7 +204,7 @@ namespace TrackTheStation
                     {
                         if (string.Equals(f.Name, "stations.txt"))
                         {
-                            result = true;
+                            bTLEfound = true;
                             break;
                         }
 
@@ -236,17 +213,18 @@ namespace TrackTheStation
                 }
                 catch
                 {
-                    result = false;
+                    bTLEfound = false;
                 }
 
             }
 
-            return result;
+            return bTLEfound;
 
         }
        
 
-        private async void UpdateOrbitPaths(ThreadPoolTimer timer)
+        // Draw the orbit path for the next 90 minutes
+        private async void UpdateOrbitPath(ThreadPoolTimer timer)
         {
 
             _startUtc = DateTime.UtcNow;
@@ -268,6 +246,7 @@ namespace TrackTheStation
 
         }
 
+        // Update ISS current position
         private async void UpdateISSPosition(ThreadPoolTimer timer)
         {
 
@@ -333,6 +312,8 @@ namespace TrackTheStation
         private double GetSpeed(Sgp4Data data)  // returns speed in km/h
         {
             var vel = data.getVelocityData();
+
+            // TO DO: move the below code into an Azure function
 
             // x,y,z are km/s
             return 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
@@ -445,6 +426,6 @@ namespace TrackTheStation
             return angle * (180 / Math.PI);
         }
 
-    
+     
     }
 }
