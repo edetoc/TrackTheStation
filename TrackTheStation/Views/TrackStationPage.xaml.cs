@@ -21,7 +21,7 @@ using Windows.UI.Xaml.Navigation;
 using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
+
 
 namespace TrackTheStation
 {
@@ -323,8 +323,8 @@ namespace TrackTheStation
                    {
                        _ISSIcon.Location = gp;
 
-                       myTextBlock.Text = issPosNow[0].coord.getHeight().ToString() + " / " +
-                                            issPosNow[0].speed.ToString();
+                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].coord.getHeight());
+                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].speed);
 
                        if (!_issLayer.MapElements.Contains(_ISSIcon))
                        {
@@ -443,6 +443,14 @@ namespace TrackTheStation
             return angle * (180 / Math.PI);
         }
 
-    
+        private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            myMapControl.MapProjection = MapProjection.Globe;
+        }
+
+        private void GlobeViewCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            myMapControl.MapProjection = MapProjection.WebMercator;
+        }
     }
 }
