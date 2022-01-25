@@ -11,11 +11,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 using Windows.Foundation;
-using Windows.Media.Core;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Threading;
@@ -122,11 +120,11 @@ namespace TrackTheStation
             
             var updateISSPositionTimer =
                 ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
-                                                    TimeSpan.FromSeconds(3));   
+                                                    TimeSpan.FromSeconds(3));
 
-            ////var updateOrbitPathsTimer =
-            ////    ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
-            ////                                        TimeSpan.FromMinutes(10));
+            var updateOrbitPathsTimer =
+                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
+                                                    TimeSpan.FromMinutes(10));
 
         }
 
@@ -158,12 +156,8 @@ namespace TrackTheStation
         private async Task<bool> TryGetTLESets()
         {
 
-            //HttpBaseProtocolFilter filter = new HttpBaseProtocolFilter();
-            //filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache; // Do not cache the http response
-
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
-
 
             bool needToCheckCache = false;
             bool bTLEfound = false;
@@ -319,15 +313,13 @@ namespace TrackTheStation
 
             double speed;
 
-            // TO DO: move the below code into an Azure function
-
             // x,y,z are km/s
             //speed = 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
             //                        Math.Pow(Math.Abs(vel.y), 2) +
             //                            Math.Pow(Math.Abs(vel.z), 2));
 
 
-            // Same as above, but using an Azure function
+            // Same as above calculation, but using an Azure function
 
             try
             {
@@ -341,20 +333,30 @@ namespace TrackTheStation
                 var content = new StringContent(myObject.ToString(), Encoding.UTF8, "application/json");
 
                 using (HttpClient client = new HttpClient())
-                using (HttpResponseMessage response = client.PostAsync(functionUrl, content).Result)
-                using (HttpContent respContent = response.Content)
                 {
-                    var tr = respContent.ReadAsStringAsync().Result;
-                    dynamic azureResponse = JsonConvert.DeserializeObject(tr);
-                    speed = (double)azureResponse;
+                    using (HttpResponseMessage response = client.PostAsync(functionUrl, content).Result)
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            using (HttpContent respContent = response.Content)
+                            {
+                                var tr = respContent.ReadAsStringAsync().Result;
+                                dynamic azureResponse = JsonConvert.DeserializeObject(tr);
+                                speed = (double)azureResponse;
 
+                            }
+                        }
+                        else
+                            speed = 0;
+                        
+                    }
                 }
+                
             }
             catch (Exception)
             {
                 speed = 0;
             }
-
 
 
             return speed;
@@ -386,13 +388,13 @@ namespace TrackTheStation
         }
 
 
-        /// <summary>
+        
         /// Takes a list of coordinates and fills in the space between them with accurately 
         /// positioned points to form a Geodesic path.
         /// 
         /// Source: http://alastaira.wordpress.com/?s=geodesic
         /// code below is from http://mapstoolbox.codeplex.com/SourceControl/latest#Microsoft.Maps.Spatialtoolbox/Source/Microsoft.Maps.SpatialToolbox.Core/SpatialTools.cs
-        /// </summary>
+        
         /// <param name="coordinates">List of coordinates to work with.</param>
         /// <param name="nodeSize">Number of nodes to insert between each coordinate</param>
         /// <returns>A set of coordinates that for geodesic paths.</returns>
@@ -445,9 +447,9 @@ namespace TrackTheStation
         }
 
 
-        /// <summary>
+        
         /// Converts an angle that is in degrees to radians. Angle * (PI / 180)
-        /// </summary>
+        
         /// <param name="angle">An angle in degrees</param>
         /// <returns>An angle in radians</returns>
         public static double ToRadians(double angle)
@@ -455,9 +457,9 @@ namespace TrackTheStation
             return angle * (Math.PI / 180);
         }
 
-        /// <summary>
+        
         /// Converts an angle that is in radians to degress. Angle * (180 / PI)
-        /// </summary>
+        
         /// <param name="angle">An angle in radians</param>
         /// <returns>An angle in degrees</returns>
         public static double ToDegrees(double angle)
