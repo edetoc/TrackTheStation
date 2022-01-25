@@ -1,11 +1,16 @@
 ﻿using Microsoft.Toolkit.Uwp.Connectivity;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using One_Sgp4;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
@@ -20,8 +25,6 @@ using Windows.UI.Popups;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Navigation;
-using Windows.Web.Http;
-using Windows.Web.Http.Filters;
 
 
 
@@ -155,11 +158,13 @@ namespace TrackTheStation
         private async Task<bool> TryGetTLESets()
         {
 
-            HttpBaseProtocolFilter filter = new HttpBaseProtocolFilter();
-            filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache; // Do not cache the http response
+            //HttpBaseProtocolFilter filter = new HttpBaseProtocolFilter();
+            //filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache; // Do not cache the http response
 
-            var httpClient = new HttpClient(filter);
-            
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.CacheControl = new CacheControlHeaderValue { NoCache = true };
+
+
             bool needToCheckCache = false;
             bool bTLEfound = false;
 
@@ -312,12 +317,47 @@ namespace TrackTheStation
         {
             var vel = data.getVelocityData();
 
+            double speed;
+
             // TO DO: move the below code into an Azure function
 
             // x,y,z are km/s
-            return 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
-                                    Math.Pow(Math.Abs(vel.y), 2) +
-                                        Math.Pow(Math.Abs(vel.z), 2));
+            //speed = 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
+            //                        Math.Pow(Math.Abs(vel.y), 2) +
+            //                            Math.Pow(Math.Abs(vel.z), 2));
+
+
+            // Same as above, but using an Azure function
+
+            try
+            {
+               
+                var functionUrl = "https://gearstest.azurewebsites.net/api/Function1";
+                var myObject = (dynamic)new JObject();
+                myObject.x = vel.x;
+                myObject.y = vel.y;
+                myObject.z = vel.z;
+
+                var content = new StringContent(myObject.ToString(), Encoding.UTF8, "application/json");
+
+                using (HttpClient client = new HttpClient())
+                using (HttpResponseMessage response = client.PostAsync(functionUrl, content).Result)
+                using (HttpContent respContent = response.Content)
+                {
+                    var tr = respContent.ReadAsStringAsync().Result;
+                    dynamic azureResponse = JsonConvert.DeserializeObject(tr);
+                    speed = (double)azureResponse;
+
+                }
+            }
+            catch (Exception)
+            {
+                speed = 0;
+            }
+
+
+
+            return speed;
 
         }
 
