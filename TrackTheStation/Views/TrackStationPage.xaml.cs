@@ -114,16 +114,16 @@ namespace TrackTheStation
             myMapControl.Layers.Add(_orbitsLayer);
             myMapControl.Layers.Add(_issLayer);
 
-            //UpdateOrbitPath(null);
+            UpdateOrbitPath(null);
             UpdateISSPosition(null);
             
             var updateISSPositionTimer =
                 ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
                                                     TimeSpan.FromSeconds(3));   
 
-            //var updateOrbitPathsTimer =
-            //    ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
-            //                                        TimeSpan.FromMinutes(10));
+            ////var updateOrbitPathsTimer =
+            ////    ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
+            ////                                        TimeSpan.FromMinutes(10));
 
         }
 
@@ -221,29 +221,29 @@ namespace TrackTheStation
             return bTLEfound;
 
         }
-       
+
 
         // Draw the orbit path for the next 90 minutes
-        //private async void UpdateOrbitPath(ThreadPoolTimer timer)
-        //{
+        private async void UpdateOrbitPath(ThreadPoolTimer timer)
+        {
 
-        //    _startUtc = DateTime.UtcNow;
+            _startUtc = DateTime.UtcNow;
 
-        //    var curOrbitSteps = ???  //THIS NEEDS TO BE UPDATED 
-        //    Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.coord).ToArray();
-            
-        //    await Dispatcher.RunAsync(CoreDispatcherPriority.High,() =>
-        //         {
+            var curOrbitSteps = GetOrbitStepsData(_startUtc, _startUtc.AddMinutes(90), ONE_MINUTE_STEP, false);                      // current orbit path, step 1 minute     
+            Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.coord).ToArray();
 
-        //             _currentOrbitPath = GetGeodesicPath(curOrbitCoords, Colors.Red, false);
-                     
-        //             _orbitsLayer.MapElements.Clear();
+            await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+                  {
 
-        //             _orbitsLayer.MapElements.Add(_currentOrbitPath);
-                     
-        //         });
+                      _currentOrbitPath = GetGeodesicPath(curOrbitCoords, Colors.Red, false);
 
-        //}
+                      _orbitsLayer.MapElements.Clear();
+
+                      _orbitsLayer.MapElements.Add(_currentOrbitPath);
+
+                  });
+
+        }
 
         // Update ISS current position
         private async void UpdateISSPosition(ThreadPoolTimer timer)
