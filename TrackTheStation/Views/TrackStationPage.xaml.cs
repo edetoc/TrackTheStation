@@ -115,9 +115,11 @@ namespace TrackTheStation
             myMapControl.Layers.Add(_orbitsLayer);
             myMapControl.Layers.Add(_issLayer);
 
+            // Display current orbit path and ISS position on the map
             UpdateOrbitPath(null);
             UpdateISSPosition(null);
             
+            // start periodic timers to refresh orbit path (every 10mn) and ISS position (every 3s)
             var updateISSPositionTimer =
                 ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
                                                     TimeSpan.FromSeconds(3));
