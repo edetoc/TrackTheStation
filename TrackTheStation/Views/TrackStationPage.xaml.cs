@@ -41,6 +41,10 @@ namespace TrackTheStation
         private MapElementsLayer _orbitsLayer;
         private MapElementsLayer _issLayer;
 
+        ThreadPoolTimer updateISSPositionTimer;
+        ThreadPoolTimer updateOrbitPathsTimer;
+
+
         const double STEP_IN_MINUTES = 1;
         
 
@@ -113,14 +117,21 @@ namespace TrackTheStation
             UpdateISSPosition(null);
             
             // start periodic timers to refresh orbit path (every 10mn) and ISS position (every 3s)
-            var updateISSPositionTimer =
-                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
-                                                    TimeSpan.FromSeconds(3));
+            updateISSPositionTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition), 
+                                                                            TimeSpan.FromSeconds(3));
 
-            var updateOrbitPathsTimer =
-                ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
-                                                    TimeSpan.FromMinutes(10));
+            updateOrbitPathsTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
+                                                                            TimeSpan.FromMinutes(10));
 
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            updateISSPositionTimer.Cancel();
+            updateISSPositionTimer = null;
+
+            updateOrbitPathsTimer.Cancel();
+            updateOrbitPathsTimer = null;
         }
 
         private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
