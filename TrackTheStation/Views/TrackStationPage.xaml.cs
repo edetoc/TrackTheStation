@@ -44,7 +44,6 @@ namespace TrackTheStation
         ThreadPoolTimer updateISSPositionTimer;
         ThreadPoolTimer updateOrbitPathsTimer;
 
-
         const double STEP_IN_MINUTES = 1;
         
 
