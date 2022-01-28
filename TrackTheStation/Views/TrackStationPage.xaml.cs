@@ -1,8 +1,4 @@
-﻿using Microsoft.Toolkit.Uwp.Connectivity;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using One_Sgp4;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -24,21 +20,20 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Maps;
 using Windows.UI.Xaml.Navigation;
 
+using Microsoft.Toolkit.Uwp.Connectivity;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using One_Sgp4;
+using TrackTheStation.Models;
 
 
 namespace TrackTheStation
 {
 
-    public class ISSPosInfo
-    {
-        public Coordinate coord { get; set; }
-        public double speed { get; set; }
-    }
-
     public sealed partial class TrackStationPage : Page
     {
       
-        private Tle _ISSTLE;
+        private Tle _ISSTLE;    // https://en.wikipedia.org/wiki/Two-line_element_set
 
         private MapIcon _ISSIcon;
         private MapPolyline _currentOrbitPath;        
@@ -46,9 +41,7 @@ namespace TrackTheStation
         private MapElementsLayer _orbitsLayer;
         private MapElementsLayer _issLayer;
 
-        private DateTime _startUtc;
-
-        const double ONE_MINUTE_STEP = 1;
+        const double STEP_IN_MINUTES = 1;
         
 
         public TrackStationPage()
@@ -228,10 +221,8 @@ namespace TrackTheStation
         private async void UpdateOrbitPath(ThreadPoolTimer timer)
         {
 
-            _startUtc = DateTime.UtcNow;
-
-            var curOrbitSteps = GetOrbitStepsData(_startUtc, _startUtc.AddMinutes(90), ONE_MINUTE_STEP, false);                      // current orbit path, step 1 minute     
-            Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.coord).ToArray();
+            var curOrbitSteps = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow.AddMinutes(90), STEP_IN_MINUTES, false);     // current orbit path, step 1 minute     
+            Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.Coord).ToArray();
 
             await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
                   {
@@ -253,8 +244,8 @@ namespace TrackTheStation
             var issPosNow = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow, 0.0001666667, true);
 
             var bgp = new BasicGeoposition();
-            bgp.Latitude = issPosNow[0].coord.getLatitude();
-            bgp.Longitude = issPosNow[0].coord.getLongitude();
+            bgp.Latitude = issPosNow[0].Coord.getLatitude();
+            bgp.Longitude = issPosNow[0].Coord.getLongitude();
 
             var gp = new Geopoint(bgp);
 
@@ -262,8 +253,8 @@ namespace TrackTheStation
                    {
                        _ISSIcon.Location = gp;
 
-                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].coord.getHeight());
-                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].speed);
+                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].Coord.getHeight());
+                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].Speed);
 
                        if (!_issLayer.MapElements.Contains(_ISSIcon))
                        {
@@ -299,10 +290,10 @@ namespace TrackTheStation
 
                 positionsInfo[i] = new ISSPosInfo();
 
-                positionsInfo[i].coord = SatFunctions.calcSatSubPoint(t, results[i], Sgp4.wgsConstant.WGS_84);
+                positionsInfo[i].Coord = SatFunctions.calcSatSubPoint(t, results[i], Sgp4.wgsConstant.WGS_84);
 
                 if (bNeedSpeed)
-                    positionsInfo[i].speed = GetSpeed(results[i]);
+                    positionsInfo[i].Speed = GetSpeed(results[i]);
             }
 
             return positionsInfo;

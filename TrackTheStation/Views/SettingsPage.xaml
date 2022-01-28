@@ -9,6 +9,11 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="this the settings page"/>
+        <StackPanel Margin="24,24">
+            <TextBlock Text="About App code challenge 1" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,24"/>
+            <TextBlock Text="Alin Ivascu (Alin.Ivascu@microsoft.com)" Style="{StaticResource BaseTextBlockStyle}"/>
+            <TextBlock Text="Claudi Cheles (Claudiu.Cheles@microsoft.com)" Style="{StaticResource BaseTextBlockStyle}"/>
+            <TextBlock Text="Eric Detoc (edetoc@microsoft.com)" Style="{StaticResource BaseTextBlockStyle}"/>
+        </StackPanel>
     </Grid>
 </Page>

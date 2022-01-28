@@ -1,0 +1,53 @@
+﻿<UserControl
+    x:Class="TrackTheStation.Views.AstroTemplateUserControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:UwpToolkitControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <RelativePanel Margin="24,4,0,12" >
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="VisualStateGroup">
+                <VisualState x:Name="NarrowView">
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger/>
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="WideView">
+                    <VisualState.Setters>
+                        <Setter Target="AstroPicture.(FrameworkElement.Width)" Value="160"/>
+                        <Setter Target="AstroPicture.(FrameworkElement.Height)" Value="160"/>
+                    </VisualState.Setters>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="600"/>
+                    </VisualState.StateTriggers>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <UwpToolkitControls:ImageEx x:Name="AstroPicture"
+          IsCacheEnabled="True"
+          Source="{Binding Picture}"
+          Width="80" Height="80"
+          CornerRadius="999" 
+          Stretch="UniformToFill"/>
+
+        <StackPanel Name="AstroInfo" RelativePanel.RightOf="AstroPicture" RelativePanel.AlignVerticalCenterWith="AstroPicture"   Orientation="Vertical" VerticalAlignment="Center" Margin="12,0,0,0">
+
+            <StackPanel Orientation="Horizontal" Margin="4,0,0,0" >
+                <TextBlock Text="{Binding FirstName}" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                <TextBlock Text="{Binding LastName}" Style="{StaticResource SubtitleTextBlockStyle}" Margin="8,0,0,0"/>
+            </StackPanel>
+
+            <StackPanel Orientation="Vertical" Margin="4,0,0,0">
+                <TextBlock Text="{Binding RoleOnISS}" Style="{StaticResource BaseTextBlockStyle}" />
+                <TextBlock Text="{Binding Agency}"  Style="{StaticResource BodyTextBlockStyle}" Foreground="Gray"  />
+            </StackPanel>
+        </StackPanel>
+
+    </RelativePanel>
+</UserControl>

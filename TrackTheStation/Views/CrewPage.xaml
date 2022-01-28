@@ -1,14 +1,71 @@
 ﻿<Page
     x:Class="TrackTheStation.CrewPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:TrackTheStation"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Behaviors"
+    xmlns:UwpToolkitControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
+    xmlns:views="using:TrackTheStation.Views"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <TextBlock Text="this is the crew page"/>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup x:Name="VisualStateGroup">
+                <VisualState x:Name="WideView">
+                    <VisualState.Setters>
+                        <Setter Target="ExpeditionPatch.(FrameworkElement.Width)" Value="270"/>
+                        <Setter Target="MyHeaderGrid.(FrameworkElement.MinHeight)" Value="245"/>
+                    </VisualState.Setters>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="600"/>
+                    </VisualState.StateTriggers>
+                </VisualState>
+                <VisualState x:Name="NarrowView">
+                    <VisualState.Setters>
+                        <Setter Target="ExpeditionPatch.(FrameworkElement.Width)" Value="140"/>
+                        <Setter Target="MyHeaderGrid.(FrameworkElement.MinHeight)" Value="130"/>
+                    </VisualState.Setters>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0"/>
+                    </VisualState.StateTriggers>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
+        <ListView x:Name="myListView" ItemsSource="{x:Bind Crew}" SelectionMode="None" >
+            
+            <Interactivity:Interaction.Behaviors>
+                <behaviors:FadeHeaderBehavior HeaderElement="{Binding ElementName=MyHeaderGrid}"/>
+            </Interactivity:Interaction.Behaviors>
+            
+            <ListView.Header>
+                <Grid x:Name="MyHeaderGrid" Margin="0,0,0,20">
+                    <StackPanel VerticalAlignment="Center">
+
+                        <UwpToolkitControls:ImageEx     x:Name="ExpeditionPatch"
+                                                        IsCacheEnabled="True"
+                                                        Source="/Assets/Crew/Expedition_Patch.png"
+                                                        Width="270"
+                                                        Stretch="UniformToFill" />
+                        <TextBlock Text="Expedition 65" FontSize="26" HorizontalAlignment="Center"/>
+                        <HyperlinkButton                                             
+                            Name="AllExpHyperlinkBtn"
+                            Content="See all expeditions"
+                            Click="AllExpHyperlinkBtn_Click"                            
+                            HorizontalAlignment="Center"  />
+                    </StackPanel>
+                </Grid>
+            </ListView.Header>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <views:AstroTemplateUserControl/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
     </Grid>
 </Page>

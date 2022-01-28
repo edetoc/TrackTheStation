@@ -119,6 +119,11 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Astronaut.cs" />
+    <Compile Include="Models\ISSPosInfo.cs" />
+    <Compile Include="Views\AstroTemplateUserControl.xaml.cs">
+      <DependentUpon>AstroTemplateUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CrewPage.xaml.cs">
       <DependentUpon>CrewPage.xaml</DependentUpon>
     </Compile>
@@ -139,6 +144,14 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\Crew\Expedition_Patch.png" />
+    <Content Include="Assets\Crew\HakihidoHoshide.png" />
+    <Content Include="Assets\Crew\MarkVandeHei.png" />
+    <Content Include="Assets\Crew\MeganMcArthur.png" />
+    <Content Include="Assets\Crew\OlegNovitskiy.png" />
+    <Content Include="Assets\Crew\PyotrDubrov.png" />
+    <Content Include="Assets\Crew\ShaneKimbrough.png" />
+    <Content Include="Assets\Crew\ThomasPesquet.png" />
     <Content Include="Assets\ISSicon.scale-100.png" />
     <Content Include="Assets\ISSicon.scale-125.png" />
     <Content Include="Assets\ISSicon.scale-150.png" />
@@ -158,6 +171,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Views\AstroTemplateUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CrewPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -180,6 +197,12 @@
       <Version>6.2.13</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.Connectivity">
+      <Version>7.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Behaviors">
+      <Version>7.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
       <Version>7.1.2</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
