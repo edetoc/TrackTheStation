@@ -112,25 +112,17 @@ namespace TrackTheStation
             myMapControl.Layers.Add(_issLayer);
 
             // Display current orbit path and ISS position on the map
-            UpdateOrbitPath(null);
+            // 
             UpdateISSPosition(null);
-            
+            //UpdateOrbitPath(null);
+
             // start periodic timers to refresh orbit path (every 10mn) and ISS position (every 3s)
             updateISSPositionTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition), 
                                                                             TimeSpan.FromSeconds(3));
 
-            updateOrbitPathsTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
-                                                                            TimeSpan.FromMinutes(10));
+            //updateOrbitPathsTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
+            //                                                                TimeSpan.FromMinutes(10));
 
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            updateISSPositionTimer.Cancel();
-            updateISSPositionTimer = null;
-
-            updateOrbitPathsTimer.Cancel();
-            updateOrbitPathsTimer = null;
         }
 
         private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
@@ -228,24 +220,24 @@ namespace TrackTheStation
 
 
         // Draw the orbit path for the next 90 minutes
-        private async void UpdateOrbitPath(ThreadPoolTimer timer)
-        {
+        //private async void UpdateOrbitPath(ThreadPoolTimer timer)
+        //{
 
-            var curOrbitSteps = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow.AddMinutes(90), STEP_IN_MINUTES, false);     // current orbit path, step 1 minute     
-            Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.Coord).ToArray();
+        //    var curOrbitSteps =  // TO DO 
+        //    Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.Coord).ToArray();
 
-            await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
-                  {
+        //    await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
+        //          {
 
-                      _currentOrbitPath = GetGeodesicPath(curOrbitCoords, Colors.Red, false);
+        //              _currentOrbitPath = GetGeodesicPath(curOrbitCoords, Colors.Red, false);
 
-                      _orbitsLayer.MapElements.Clear();
+        //              _orbitsLayer.MapElements.Clear();
 
-                      _orbitsLayer.MapElements.Add(_currentOrbitPath);
+        //              _orbitsLayer.MapElements.Add(_currentOrbitPath);
 
-                  });
+        //          });
 
-        }
+        //}
 
         // Update ISS current position
         private async void UpdateISSPosition(ThreadPoolTimer timer)
@@ -317,50 +309,11 @@ namespace TrackTheStation
             double speed;
 
             // x,y,z are km/s
-            //speed = 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
-            //                        Math.Pow(Math.Abs(vel.y), 2) +
-            //                            Math.Pow(Math.Abs(vel.z), 2));
+            speed = 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
+                                    Math.Pow(Math.Abs(vel.y), 2) +
+                                        Math.Pow(Math.Abs(vel.z), 2));
 
-
-            // Same as above calculation, but using an Azure function
-
-            try
-            {
-               
-                var functionUrl = "https://gearstest.azurewebsites.net/api/Function1";
-                var myObject = (dynamic)new JObject();
-                myObject.x = vel.x;
-                myObject.y = vel.y;
-                myObject.z = vel.z;
-
-                var content = new StringContent(myObject.ToString(), Encoding.UTF8, "application/json");
-
-                using (HttpClient client = new HttpClient())
-                {
-                    using (HttpResponseMessage response = client.PostAsync(functionUrl, content).Result)
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            using (HttpContent respContent = response.Content)
-                            {
-                                var tr = respContent.ReadAsStringAsync().Result;
-                                dynamic azureResponse = JsonConvert.DeserializeObject(tr);
-                                speed = (double)azureResponse;
-
-                            }
-                        }
-                        else
-                            speed = 0;
-                        
-                    }
-                }
-                
-            }
-            catch (Exception)
-            {
-                speed = 0;
-            }
-
+            // TO DO : perform the above calculation using an Azure function
 
             return speed;
 
