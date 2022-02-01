@@ -314,7 +314,7 @@ namespace TrackTheStation
         {
             var vel = data.getVelocityData();
 
-            double speed;
+            double speed =0;
 
             // x,y,z are km/s
             //speed = 3600 * Math.Sqrt(Math.Pow(Math.Abs(vel.x), 2) +
@@ -326,18 +326,15 @@ namespace TrackTheStation
 
             try
             {
-               
-                var functionUrl = "https://gearstest.azurewebsites.net/api/Function1";
-                var myObject = (dynamic)new JObject();
-                myObject.x = vel.x;
-                myObject.y = vel.y;
-                myObject.z = vel.z;
 
-                var content = new StringContent(myObject.ToString(), Encoding.UTF8, "application/json");
+                StringBuilder uriString = new StringBuilder();
+                
+                uriString.AppendFormat("https://gearstest.azurewebsites.net/api/Function1?x={0}&y={1}&z={2}",vel.x.ToString(), vel.y.ToString(), vel.z.ToString() );
 
                 using (HttpClient client = new HttpClient())
                 {
-                    using (HttpResponseMessage response = client.PostAsync(functionUrl, content).Result)
+
+                    using (HttpResponseMessage response = client.GetAsync(new Uri(uriString.ToString())).Result)
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -348,10 +345,8 @@ namespace TrackTheStation
                                 speed = (double)azureResponse;
 
                             }
-                        }
-                        else
-                            speed = 0;
-                        
+                        }                      
+
                     }
                 }
                 
