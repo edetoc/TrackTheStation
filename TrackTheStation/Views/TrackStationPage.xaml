@@ -37,28 +37,30 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal">
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" Margin="8,0,0,0" >
                 <TextBlock Text="Altitude:" VerticalAlignment="Center"/>
                 <TextBlock Name="AltTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
             </StackPanel>
-            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal">
+            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="8,0,0,0" >
                 <TextBlock Text="Velocity:" VerticalAlignment="Center"/>
                 <TextBlock Name="VelocityTB" Text="" VerticalAlignment="Center" Foreground="Green" Margin="8,0,0,0"/>
             </StackPanel>
 
             <CheckBox  Name="GlobeViewCB" 
-                           Grid.Row="0"  Grid.Column="1" 
-                           Content="Globe view" 
-                           IsChecked="False" Checked="GlobeViewCB_Checked" Unchecked="GlobeViewCB_Unchecked" 
-                           HorizontalAlignment="Right" 
-                           FlowDirection="RightToLeft"/>
+                       Grid.Row="0"  Grid.Column="1" 
+                       Margin="0,0,8,0"
+                       Content="Globe view" 
+                       IsChecked="False" Checked="GlobeViewCB_Checked" Unchecked="GlobeViewCB_Unchecked" 
+                       HorizontalAlignment="Right" 
+                       FlowDirection="RightToLeft" />
 
             <CheckBox  Name="LiveStreamCB" 
-                           Grid.Row="1"  Grid.Column="1" 
-                           Content="Live stream" 
-                           IsChecked="False" Checked="LiveStreamCB_Checked" Unchecked="LiveStreamCB_Unchecked" 
-                           HorizontalAlignment="Right" 
-                           FlowDirection="RightToLeft"/>
+                       Grid.Row="1"  Grid.Column="1" 
+                       Margin="0,0,8,0"
+                       Content="Live stream" 
+                       IsChecked="False" Checked="LiveStreamCB_Checked" Unchecked="LiveStreamCB_Unchecked" 
+                       HorizontalAlignment="Right" 
+                       FlowDirection="RightToLeft" />
 
         </Grid>
 
