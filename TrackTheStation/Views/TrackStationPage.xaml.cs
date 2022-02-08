@@ -396,14 +396,9 @@ namespace TrackTheStation
 
         }
 
-
-        
         /// Takes a list of coordinates and fills in the space between them with accurately 
         /// positioned points to form a Geodesic path.
-        /// 
-        /// Source: http://alastaira.wordpress.com/?s=geodesic
-        /// code below is from http://mapstoolbox.codeplex.com/SourceControl/latest#Microsoft.Maps.Spatialtoolbox/Source/Microsoft.Maps.SpatialToolbox.Core/SpatialTools.cs
-        
+        ///         
         /// <param name="coordinates">List of coordinates to work with.</param>
         /// <param name="nodeSize">Number of nodes to insert between each coordinate</param>
         /// <returns>A set of coordinates that for geodesic paths.</returns>
