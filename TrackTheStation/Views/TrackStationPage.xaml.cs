@@ -45,7 +45,9 @@ namespace TrackTheStation
         ThreadPoolTimer updateOrbitPathsTimer;
 
         const double STEP_IN_MINUTES = 1;
-        
+
+        const string FUNCTION_URL_STRING = "getspeedfunc20220208170627.azurewebsites.net";
+        const string FUNCTION_NAME = "Function1";
 
         public TrackStationPage()
         {
@@ -111,14 +113,20 @@ namespace TrackTheStation
             myMapControl.Layers.Add(_orbitsLayer);
             myMapControl.Layers.Add(_issLayer);
 
-            // Display current orbit path and ISS position on the map
-            UpdateOrbitPath(null);
+            // Display ISS position on the map             
             UpdateISSPosition(null);
-            
-            // start periodic timers to refresh orbit path (every 10mn) and ISS position (every 3s)
-            updateISSPositionTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition), 
+
+            // start a periodic timer to refresh orbit path (every 10mn) and ISS position (every 3s)
+            updateISSPositionTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateISSPosition),
                                                                             TimeSpan.FromSeconds(3));
 
+
+            // Exercise 2
+
+            // Display the current orbit path of the Station on the map
+            UpdateOrbitPath(null);
+
+            // start a periodic timer to refresh the Station orbit path(every 10mn) 
             updateOrbitPathsTimer = ThreadPoolTimer.CreatePeriodicTimer(new TimerElapsedHandler(UpdateOrbitPath),
                                                                             TimeSpan.FromMinutes(10));
 
@@ -126,6 +134,8 @@ namespace TrackTheStation
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
+            // Exercise 3
+
             updateISSPositionTimer.Cancel();
             updateISSPositionTimer = null;
 
@@ -231,7 +241,9 @@ namespace TrackTheStation
         private async void UpdateOrbitPath(ThreadPoolTimer timer)
         {
 
+            // Exercise 2.
             var curOrbitSteps = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow.AddMinutes(90), STEP_IN_MINUTES, false);     // current orbit path, step 1 minute     
+
             Coordinate[] curOrbitCoords = curOrbitSteps.Select(step => step.Coord).ToArray();
 
             await Dispatcher.RunAsync(CoreDispatcherPriority.High, () =>
@@ -321,15 +333,19 @@ namespace TrackTheStation
             //                        Math.Pow(Math.Abs(vel.y), 2) +
             //                            Math.Pow(Math.Abs(vel.z), 2));
 
-
-            // Same as above calculation, but using an Azure function
+            // Exercise 1 : uncomment the Try-Catch block below (and comment the code above) to call the Azure function to retrieve the Speed of the Station
+            //              You'll need to change FUNCTION_URL_STRING and FUNCTION_NAME (these const are defined on lines 49 and 50) with your own values
 
             try
             {
 
                 StringBuilder uriString = new StringBuilder();
-                
-                uriString.AppendFormat("https://gearstest.azurewebsites.net/api/Function1?x={0}&y={1}&z={2}",vel.x.ToString(), vel.y.ToString(), vel.z.ToString() );
+
+                uriString.AppendFormat("https://{0}/api/{1}?x={2}&y={3}&z={4}", FUNCTION_URL_STRING,
+                                                                                FUNCTION_NAME,
+                                                                                vel.x.ToString(),
+                                                                                vel.y.ToString(),
+                                                                                vel.z.ToString());
 
                 using (HttpClient client = new HttpClient())
                 {
@@ -345,11 +361,11 @@ namespace TrackTheStation
                                 speed = (double)azureResponse;
 
                             }
-                        }                      
+                        }
 
                     }
                 }
-                
+
             }
             catch (Exception)
             {
