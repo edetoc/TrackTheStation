@@ -59,6 +59,9 @@ namespace TrackTheStation
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
 
+            GlobeViewCB.Tapped += GlobeViewCB_Tapped;
+            LiveStreamCB.Tapped += LiveStreamCB_Tapped;
+
             // Get TLE
             var bSuccess = await TryGetTLESets();
 
@@ -121,7 +124,7 @@ namespace TrackTheStation
                                                                             TimeSpan.FromSeconds(3));
 
 
-            // Exercise 2
+            // Exercise 2:
 
             // Display the current orbit path of the Station on the map
             UpdateOrbitPath(null);
@@ -134,7 +137,12 @@ namespace TrackTheStation
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            // Exercise 3
+            // unsuscribe events
+
+            GlobeViewCB.Tapped -= GlobeViewCB_Tapped;
+            LiveStreamCB.Tapped -= LiveStreamCB_Tapped;
+
+            // here's the fix for Exercise 3
 
             updateISSPositionTimer.Cancel();
             updateISSPositionTimer = null;
@@ -143,27 +151,33 @@ namespace TrackTheStation
             updateOrbitPathsTimer = null;
         }
 
-        private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void GlobeViewCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            myMapControl.MapProjection = MapProjection.Globe;
+           
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                myMapControl.MapProjection = ((sender as CheckBox).IsChecked.Value == true) ? MapProjection.Globe : MapProjection.WebMercator;
+
+            }
+                
         }
 
-        private void GlobeViewCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            myMapControl.MapProjection = MapProjection.WebMercator;
-        }
 
-        private void LiveStreamCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-
-            webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
-            webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
-        }
-
-        private void LiveStreamCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            webView.Navigate(new Uri("about:blank"));
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                if ((sender as CheckBox).IsChecked.Value == true)
+                {
+                    webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                }
+                else
+                {
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    webView.Navigate(new Uri("about:blank"));
+                }
+            }
 
         }
 
@@ -372,7 +386,6 @@ namespace TrackTheStation
                 speed = 0;
             }
 
-
             return speed;
 
         }
@@ -400,7 +413,6 @@ namespace TrackTheStation
             return polyline;
 
         }
-
 
         
         /// Takes a list of coordinates and fills in the space between them with accurately 
@@ -460,8 +472,6 @@ namespace TrackTheStation
 
         }
 
-
-        
         /// Converts an angle that is in degrees to radians. Angle * (PI / 180)
         
         /// <param name="angle">An angle in degrees</param>
@@ -481,6 +491,6 @@ namespace TrackTheStation
             return angle * (180 / Math.PI);
         }
 
-     
+      
     }
 }
