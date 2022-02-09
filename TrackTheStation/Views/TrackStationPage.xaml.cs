@@ -46,8 +46,8 @@ namespace TrackTheStation
 
         const double STEP_IN_MINUTES = 1;
 
-        const string FUNCTION_URL_STRING = "gearstest.azurewebsites.net";
-        const string FUNCTION_NAME= "Function1";
+        const string FUNCTION_URL_STRING =  "<FILL HERE>";
+        const string FUNCTION_NAME=         "<FILL HERE>";
         
 
         public TrackStationPage()
@@ -59,6 +59,9 @@ namespace TrackTheStation
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
+
+            GlobeViewCB.Tapped += GlobeViewCB_Tapped;
+            LiveStreamCB.Tapped += LiveStreamCB_Tapped;
 
             // Get TLE
             var bSuccess = await TryGetTLESets();
@@ -135,33 +138,39 @@ namespace TrackTheStation
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
+            // unsuscribe events
+
+            GlobeViewCB.Tapped -= GlobeViewCB_Tapped;
+            LiveStreamCB.Tapped -= LiveStreamCB_Tapped;
 
             // you may need to add something here for Exercise 3 ...
 
         }
 
-        private void GlobeViewCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void GlobeViewCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            myMapControl.MapProjection = MapProjection.Globe;
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                myMapControl.MapProjection = ((sender as CheckBox).IsChecked.Value == true) ? MapProjection.Globe : MapProjection.WebMercator;
+
+            }
         }
 
-        private void GlobeViewCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
-            myMapControl.MapProjection = MapProjection.WebMercator;
-        }
-
-        private void LiveStreamCB_Checked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-
-            webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
-            webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
-        }
-
-        private void LiveStreamCB_Unchecked(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        {
-            webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            webView.Navigate(new Uri("about:blank"));
-
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                if ((sender as CheckBox).IsChecked.Value == true)
+                {
+                    webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                }
+                else
+                {
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    webView.Navigate(new Uri("about:blank"));
+                }
+            }
         }
 
         // this code tries to retrieve the TLE for the ISS from Internet, or from local cache (if no Internet)
@@ -253,6 +262,7 @@ namespace TrackTheStation
         //          });
 
         //}
+
 
         // Update ISS current position
         private async void UpdateISSPosition(ThreadPoolTimer timer)

@@ -23,8 +23,6 @@
                 ZoomLevel="2.5"
                 MapServiceToken="pUI1hB0O8ATL7Qty0iP4~Vqw0gSq38Xr0Dy5SsM0l-A~AhX4NLHhp2j2FvdCBXrJhxt84IsB4KQhgXF3VXjh3oB2ELkIfMIVCiwJFgQ-2WQx" />
 
-        
-
         <WebView  Grid.Row="0" Name="webView" Width="550" Height="550" HorizontalAlignment="Left" VerticalAlignment="Top" Visibility="Collapsed"/>
 
         <Grid Grid.Row="1">
@@ -50,7 +48,7 @@
                        Grid.Row="0"  Grid.Column="1" 
                        Margin="0,0,8,0" 
                        Content="Globe view" 
-                       IsChecked="False" Checked="GlobeViewCB_Checked" Unchecked="GlobeViewCB_Unchecked" 
+                       IsChecked="False" 
                        HorizontalAlignment="Right" 
                        FlowDirection="RightToLeft" />
 
@@ -58,12 +56,11 @@
                        Grid.Row="1"  Grid.Column="1" 
                        Margin="0,0,8,0"
                        Content="Live stream" 
-                       IsChecked="False" Checked="LiveStreamCB_Checked" Unchecked="LiveStreamCB_Unchecked" 
+                       IsChecked="False" 
                        HorizontalAlignment="Right" 
                        FlowDirection="RightToLeft"/>
 
         </Grid>
-
 
     </Grid>
 </Page>
