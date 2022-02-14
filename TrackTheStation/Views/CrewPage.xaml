@@ -4,68 +4,76 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Behaviors"
     xmlns:UwpToolkitControls="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:Interactivity="using:Microsoft.Xaml.Interactivity"
     xmlns:views="using:TrackTheStation.Views"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid >
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup x:Name="VisualStateGroup">
+                
                 <VisualState x:Name="WideView">
-                    <VisualState.Setters>
-                        <Setter Target="ExpeditionPatch.(FrameworkElement.Width)" Value="270"/>
-                        <Setter Target="MyHeaderGrid.(FrameworkElement.MinHeight)" Value="245"/>
-                    </VisualState.Setters>
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="600"/>
                     </VisualState.StateTriggers>
-                </VisualState>
-                <VisualState x:Name="NarrowView">
                     <VisualState.Setters>
-                        <Setter Target="ExpeditionPatch.(FrameworkElement.Width)" Value="140"/>
-                        <Setter Target="MyHeaderGrid.(FrameworkElement.MinHeight)" Value="130"/>
+                        <Setter Target="missionPatchGrid.Width" Value="700"/>
+                        <Setter Target="missionPatchGrid.Height" Value="500"/>
+                        <Setter Target="missionPatchGrid.(RelativePanel.AlignTopWith)" Value="crewListView"/>
+                        <Setter Target="missionPatchGrid.(RelativePanel.RightOf)" Value="crewListView"/>
                     </VisualState.Setters>
+                </VisualState>
+                
+                <VisualState x:Name="NarrowView">
                     <VisualState.StateTriggers>
                         <AdaptiveTrigger MinWindowWidth="0"/>
                     </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="missionPatchGrid.Width" Value="400"/>
+                        <Setter Target="missionPatchGrid.Height" Value="300"/>
+                        <Setter Target="crewListView.(RelativePanel.Below)" Value="missionPatchGrid"/>
+                        <Setter Target="missionPatchGrid.(RelativePanel.AlignHorizontalCenterWithPanel)" Value="True"/>
+                    </VisualState.Setters>
                 </VisualState>
+                
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
         
-        <ListView x:Name="myListView" ItemsSource="{x:Bind Crew}" SelectionMode="None" >
+        <RelativePanel>
             
-            <Interactivity:Interaction.Behaviors>
-                <behaviors:FadeHeaderBehavior HeaderElement="{Binding ElementName=MyHeaderGrid}"/>
-            </Interactivity:Interaction.Behaviors>
-            
-            <ListView.Header>
-                <Grid x:Name="MyHeaderGrid" Margin="0,0,0,20">
-                    <StackPanel VerticalAlignment="Center">
+            <ListView x:Name="crewListView" ItemsSource="{x:Bind Crew}" SelectionMode="None" >
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <views:AstroTemplateUserControl/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
-                        <UwpToolkitControls:ImageEx     x:Name="ExpeditionPatch"
-                                                        IsCacheEnabled="True"
-                                                        Source="/Assets/Crew/Expedition_Patch.png"
-                                                        Width="270"
-                                                        Stretch="UniformToFill" />
-                        <TextBlock Text="Expedition 65" FontSize="26" HorizontalAlignment="Center"/>
-                        <HyperlinkButton                                             
-                            Name="AllExpHyperlinkBtn"
-                            Content="See all expeditions"
-                            Click="AllExpHyperlinkBtn_Click"                            
-                            HorizontalAlignment="Center"  />
-                    </StackPanel>
-                </Grid>
-            </ListView.Header>
-
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <views:AstroTemplateUserControl/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-
-        </ListView>
+            <Grid x:Name="missionPatchGrid" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                
+                    <UwpToolkitControls:ImageEx Grid.Row="0"  
+                                                Name="ExpeditionPatch"
+                                                IsCacheEnabled="True"
+                                                Source="/Assets/Crew/Expedition_Patch.png"                                              
+                                                Stretch="Uniform" />
+                    
+                    <TextBlock  Grid.Row="1" Text="Expedition 65"  HorizontalAlignment="Center"/>
+                
+                    <HyperlinkButton    Grid.Row="2"
+                                        Name="AllExpHyperlinkBtn"
+                                        Content="See all expeditions"
+                                        Click="AllExpHyperlinkBtn_Click"                            
+                                        HorizontalAlignment="Center"  />
+             
+            </Grid>
+          
+        </RelativePanel>
+        
     </Grid>
 </Page>
