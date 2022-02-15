@@ -75,11 +75,9 @@ namespace TrackTheStation
                 return;
             }
 
-            // Parse TLE. it looks like this :
+            // Parse TLE. a TLE looks like this :
 
                   /*
-
-                  Response looks like:
 
                   ISS (ZARYA)             
                   1 25544U 98067A   22024.46959583  .00005654  00000-0  10839-3 0  9993
@@ -173,7 +171,7 @@ namespace TrackTheStation
             }
         }
 
-        // this code tries to retrieve the TLE for the ISS from Internet, or from local cache (if no Internet)
+        // this code tries to retrieve the TLE for the ISS from Celestrak.com, or from local cache (if no Internet)
         private async Task<bool> TryGetTLESets()
         {
 
@@ -242,6 +240,38 @@ namespace TrackTheStation
 
         }
 
+        // Update ISS current location on map
+        private async void UpdateISSPosition(ThreadPoolTimer timer)
+        {
+            // Get current location
+            var issPosNow = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow, 0.0001666667, true);
+
+            var bgp = new BasicGeoposition();
+            bgp.Latitude = issPosNow[0].Coord.getLatitude();
+            bgp.Longitude = issPosNow[0].Coord.getLongitude();
+
+            var gp = new Geopoint(bgp);
+
+            // Update ISS location on Map
+            await Dispatcher.RunAsync(CoreDispatcherPriority.High, async () =>
+                   {
+                       _ISSIcon.Location = gp;
+
+                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].Coord.getHeight());
+                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].Speed);
+
+                       if (!_issLayer.MapElements.Contains(_ISSIcon))
+                       {
+                           _issLayer.MapElements.Add(_ISSIcon);
+
+                           await myMapControl.TrySetViewAsync(_ISSIcon.Location);
+
+                       }
+
+                   });
+
+        }
+
 
         // Draw the orbit path for the next 90 minutes
         //private async void UpdateOrbitPath(ThreadPoolTimer timer)
@@ -264,37 +294,7 @@ namespace TrackTheStation
         //}
 
 
-        // Update ISS current position
-        private async void UpdateISSPosition(ThreadPoolTimer timer)
-        {
-
-            var issPosNow = GetOrbitStepsData(DateTime.UtcNow, DateTime.UtcNow, 0.0001666667, true);
-
-            var bgp = new BasicGeoposition();
-            bgp.Latitude = issPosNow[0].Coord.getLatitude();
-            bgp.Longitude = issPosNow[0].Coord.getLongitude();
-
-            var gp = new Geopoint(bgp);
-
-            await Dispatcher.RunAsync(CoreDispatcherPriority.High, async () =>
-                   {
-                       _ISSIcon.Location = gp;
-
-                       AltTB.Text = String.Format("{0:#} km", issPosNow[0].Coord.getHeight());
-                       VelocityTB.Text = String.Format("{0:#} km/h", issPosNow[0].Speed);
-
-                       if (!_issLayer.MapElements.Contains(_ISSIcon))
-                       {
-                           _issLayer.MapElements.Add(_ISSIcon);
-
-                           await myMapControl.TrySetViewAsync(_ISSIcon.Location);
-
-                       }
-
-                   });
-
-        }
-
+        // Returns an array of positions between startUtc and endUtc
         private ISSPosInfo[] GetOrbitStepsData(DateTime startUtc, DateTime endUtc, double step /* in minutes */, bool bNeedSpeed)
         {
 
@@ -303,9 +303,11 @@ namespace TrackTheStation
             EpochTime startTime = new EpochTime(startUtc);
             EpochTime stopTime = new EpochTime(endUtc);
 
-            sgp4Propagator.runSgp4Cal(startTime, stopTime, step);  // one point every step
-
-            List<Sgp4Data> results = new List<Sgp4Data>();
+            // use the model propagator to calculate satellite position vector at every single step between start and stop
+            // note: the Sgp4Data class holds the calculated position and velocity vectors of the satellite
+            sgp4Propagator.runSgp4Cal(startTime, stopTime, step);
+                        
+            List<Sgp4Data> results = new List<Sgp4Data>();          
             results = sgp4Propagator.getResults();
 
             var positionsInfo = new ISSPosInfo[results.Count];
@@ -316,7 +318,8 @@ namespace TrackTheStation
                 EpochTime t = new EpochTime(startUtc.AddMinutes(i * step));   // 1mn
 
                 positionsInfo[i] = new ISSPosInfo();
-
+                
+                // calculate Latitude, longitude and height for satellite on earth at given time point and position of the satellite
                 positionsInfo[i].Coord = SatFunctions.calcSatSubPoint(t, results[i], Sgp4.wgsConstant.WGS_84);
 
                 if (bNeedSpeed)
