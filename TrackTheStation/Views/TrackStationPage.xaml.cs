@@ -145,31 +145,7 @@ namespace TrackTheStation
 
         }
 
-        private void GlobeViewCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
-        {
-            if ((sender as CheckBox).IsChecked.HasValue)
-            {
-                myMapControl.MapProjection = ((sender as CheckBox).IsChecked.Value == true) ? MapProjection.Globe : MapProjection.WebMercator;
-
-            }
-        }
-
-        private void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
-        {
-            if ((sender as CheckBox).IsChecked.HasValue)
-            {
-                if ((sender as CheckBox).IsChecked.Value == true)
-                {
-                    webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
-                    webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                }
-                else
-                {
-                    webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                    webView.Navigate(new Uri("about:blank"));
-                }
-            }
-        }
+       
 
         // this code tries to retrieve the TLE for the ISS from Celestrak.com, or from local cache (if no Internet)
         private async Task<bool> TryGetTLESets()
@@ -383,6 +359,32 @@ namespace TrackTheStation
 
             return speed;
 
+        }
+
+        private void GlobeViewCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                myMapControl.MapProjection = ((sender as CheckBox).IsChecked.Value == true) ? MapProjection.Globe : MapProjection.WebMercator;
+
+            }
+        }
+
+        private void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        {
+            if ((sender as CheckBox).IsChecked.HasValue)
+            {
+                if ((sender as CheckBox).IsChecked.Value == true)
+                {
+                    webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                }
+                else
+                {
+                    webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    webView.Navigate(new Uri("about:blank"));
+                }
+            }
         }
 
         // Draw the geodesic path of ISS based on an array of geo positions 
