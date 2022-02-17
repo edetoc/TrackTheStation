@@ -25,7 +25,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using One_Sgp4;
 using TrackTheStation.Models;
-
+using Windows.UI.WindowManagement;
+using TrackTheStation.Views;
+using Windows.UI.Xaml.Hosting;
 
 namespace TrackTheStation
 {
@@ -373,19 +375,51 @@ namespace TrackTheStation
         }
 
 
-        private void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
+        private async void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             if ((sender as CheckBox).IsChecked.HasValue)
             {
                 if ((sender as CheckBox).IsChecked.Value == true)
                 {
-                    webView.Navigate(new Uri("https://www.ustream.tv/embed/17074538"));
-                    webView.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                    // Create a new window.
+                    AppWindow appWindow = await AppWindow.TryCreateAsync();
+
+                    // Set window dimensions
+                    appWindow.RequestSize(new Size(450, 450));
+
+                    // Create a Frame and navigate to the Page you want to show in the new window.
+                    Frame appWindowContentFrame = new Frame();
+                    appWindowContentFrame.Navigate(typeof(LiveStreamPage));
+
+                    // Attach the XAML content to the window.
+                    ElementCompositionPreview.SetAppWindowContent(appWindow, appWindowContentFrame);
+
+                    // Add the new page to the Dictionary using the UIContext as the Key.
+                    MainPage.AppWindows.Add(appWindowContentFrame.UIContext, appWindow);
+                    appWindow.Title = "Space Station Live stream";
+
+                    // When the window is closed, be sure to release XAML resources
+                    // and the reference to the window.                    
+                    appWindow.Closed += delegate
+                    {
+                        MainPage.AppWindows.Remove(appWindowContentFrame.UIContext);
+                        appWindowContentFrame.Content = null;
+                        appWindow = null;
+
+                        LiveStreamCB.IsChecked = false;
+                    };
+
+                    // Show the window.
+                    await appWindow.TryShowAsync();
+
+
                 }
                 else
                 {
-                    webView.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                    webView.Navigate(new Uri("about:blank"));
+                    while (MainPage.AppWindows.Count > 0)
+                    {
+                        await MainPage.AppWindows.Values.First().CloseAsync();
+                    }
                 }
             }
 
