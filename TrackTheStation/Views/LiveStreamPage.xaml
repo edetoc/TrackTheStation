@@ -1,0 +1,19 @@
+﻿<Page
+    x:Class="TrackTheStation.Views.LiveStreamPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TrackTheStation.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="The video stream may appear black when ISS is in darkness" FontSize="15" FontStyle="Italic" HorizontalAlignment="Center" Foreground="#FF3B43BB" />
+        <WebView Grid.Row="1" Source="https://www.ustream.tv/embed/17074538"/>
+    </Grid>
+</Page>
