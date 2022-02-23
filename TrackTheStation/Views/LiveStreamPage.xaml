@@ -14,7 +14,9 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock Text="The video stream may appear black when ISS is in darkness" FontSize="15" FontStyle="Italic" HorizontalAlignment="Center" Foreground="#FF3B43BB" />
-        <WebView Grid.Row="1" Source="https://www.ustream.tv/embed/17074538"/>
+        <!--Official ISS Live stream on UStream is blocked on lab environment-->
+        <!--<WebView Grid.Row="1" Source="https://www.ustream.tv/embed/17074538"/>-->
+        <WebView Grid.Row="1" Source=" https://www.youtube.com/embed/0U9A06vrYXc?autoplay=1"/>
 
     </Grid>
 </Page>
