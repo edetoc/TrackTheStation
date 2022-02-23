@@ -15,7 +15,7 @@
   <mp:PhoneIdentity PhoneProductId="73e286f7-406f-48ab-a15f-8a986ca5ad73" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>TrackTheStation</DisplayName>
+    <DisplayName>TrackTheStationLab</DisplayName>
     <PublisherDisplayName>eric</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -33,7 +33,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="TrackTheStation.App">
       <uap:VisualElements
-        DisplayName="TrackTheStation"
+        DisplayName="TrackTheStation Lab"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png"
         Description="TrackTheStation"
