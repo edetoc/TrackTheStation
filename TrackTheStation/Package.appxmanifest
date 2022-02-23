@@ -9,14 +9,14 @@
 
   <Identity
     Name="0F69B340-3E7E-4572-BC27-6DFDCD6D10F3"
-    Publisher="CN=Gears2022"
+    Publisher="CN=LabPublisher"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="0F69B340-3E7E-4572-BC27-6DFDCD6D10F3" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>TrackTheStationLab</DisplayName>
-    <PublisherDisplayName>Gears2022</PublisherDisplayName>
+    <PublisherDisplayName>LabPublisher</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
