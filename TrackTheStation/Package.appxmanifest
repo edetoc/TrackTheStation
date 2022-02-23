@@ -8,15 +8,15 @@
   IgnorableNamespaces="uap mp rescap">
 
   <Identity
-    Name="73e286f7-406f-48ab-a15f-8a986ca5ad73"
-    Publisher="CN=eric"
+    Name="8CEE24FE-4FAB-4E92-8423-6BFBAA14E00B"
+    Publisher="CN=gears2022"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="73e286f7-406f-48ab-a15f-8a986ca5ad73" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>TrackTheStation</DisplayName>
-    <PublisherDisplayName>eric</PublisherDisplayName>
+    <PublisherDisplayName>gears2022</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
