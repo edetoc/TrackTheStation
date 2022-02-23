@@ -18,7 +18,7 @@
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <WindowsXamlEnableOverview>true</WindowsXamlEnableOverview>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <PackageCertificateThumbprint>F0B27852CEED40D10485EEE1F38A754EBD75D494</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>97E39970D898333C0EEB10A538AB9A05315D4A70</PackageCertificateThumbprint>
     <PackageCertificateKeyFile>TrackTheStation_TemporaryKey.pfx</PackageCertificateKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
