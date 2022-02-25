@@ -25,6 +25,13 @@ namespace TrackTheStation.Views
         public LiveStreamPage()
         {
             this.InitializeComponent();
+            this.Unloaded += LiveStreamPage_Unloaded;
+        }
+
+        private void LiveStreamPage_Unloaded(object sender, RoutedEventArgs e)
+        {
+            this.Unloaded -= LiveStreamPage_Unloaded;
+            myWebView.Navigate(new Uri("about:blank"));
         }
     }
 }

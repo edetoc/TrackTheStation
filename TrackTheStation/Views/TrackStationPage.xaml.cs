@@ -374,13 +374,13 @@ namespace TrackTheStation
 
         }
 
-
         private async void LiveStreamCB_Tapped(object sender, Windows.UI.Xaml.Input.TappedRoutedEventArgs e)
         {
             if ((sender as CheckBox).IsChecked.HasValue)
             {
                 if ((sender as CheckBox).IsChecked.Value == true)
                 {
+
                     // Create a new window.
                     AppWindow appWindow = await AppWindow.TryCreateAsync();
 
@@ -406,23 +406,18 @@ namespace TrackTheStation
                         appWindowContentFrame.Content = null;
                         appWindow = null;
 
+                        LiveStreamCB.IsEnabled = true;
                         LiveStreamCB.IsChecked = false;
                     };
+
+                    LiveStreamCB.IsEnabled = false;
 
                     // Show the window.
                     await appWindow.TryShowAsync();
 
+                }
 
-                }
-                else
-                {
-                    while (MainPage.AppWindows.Count > 0)
-                    {
-                        await MainPage.AppWindows.Values.First().CloseAsync();
-                    }
-                }
             }
-
         }
 
         // Draw the geodesic path of ISS based on an array of geo positions 
