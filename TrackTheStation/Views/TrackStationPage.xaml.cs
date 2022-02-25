@@ -402,20 +402,17 @@ namespace TrackTheStation
                         appWindowContentFrame.Content = null;
                         appWindow = null;
 
+                        LiveStreamCB.IsEnabled = true;
                         LiveStreamCB.IsChecked = false;
                     };
+
+                    LiveStreamCB.IsEnabled = false;
 
                     // Show the window.
                     await appWindow.TryShowAsync();
 
                 }
-                else
-                {
-                    while (MainPage.AppWindows.Count > 0)
-                    {
-                        await MainPage.AppWindows.Values.First().CloseAsync();
-                    }
-                }
+              
             }
         }
 
