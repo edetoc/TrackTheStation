@@ -45,7 +45,7 @@ namespace TrackTheStation
         {
             var deferral = e.GetDeferral();
 
-            // Make sure to close all the windows that have opened by the app
+            //Make sure to close all the windows that have opened by the app
             while (MainPage.AppWindows.Count > 0)
             {
                 await AppWindows.Values.First().CloseAsync();
