@@ -398,9 +398,9 @@ namespace TrackTheStation
                     MainPage.AppWindows.Add(appWindowContentFrame.UIContext, appWindow);
                     appWindow.Title = "Space Station Live stream";
 
-                    // When the window is closed, be sure to release XAML resources
+                    // When the window is requested closed, be sure to release XAML resources
                     // and the reference to the window.                    
-                    appWindow.Closed += delegate
+                    appWindow.CloseRequested += delegate
                     {
                         MainPage.AppWindows.Remove(appWindowContentFrame.UIContext);
                         appWindowContentFrame.Content = null;
@@ -408,6 +408,14 @@ namespace TrackTheStation
 
                         LiveStreamCB.IsEnabled = true;
                         LiveStreamCB.IsChecked = false;
+                    };
+
+                    // When the App is closed by the user, CloseAsync() is called on the AppWindow
+                    // However appWindow.CloseRequested is not called in that case, only appWindow.Closed is called.
+                    appWindow.Closed += delegate
+                    {
+                        MainPage.AppWindows.Clear();
+
                     };
 
                     LiveStreamCB.IsEnabled = false;
