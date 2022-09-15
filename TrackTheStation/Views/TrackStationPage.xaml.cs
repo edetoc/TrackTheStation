@@ -170,7 +170,7 @@ namespace TrackTheStation
                 try
                 {
 
-                    var response = await httpClient.GetStringAsync(new Uri("https://celestrak.com/satcat/tle.php?CATNR=25544"));
+                    var response = await httpClient.GetStringAsync(new Uri("https://celestrak.org/NORAD/elements/gp.php?CATNR=25544"));
 
                     Debug.WriteLine(ApplicationData.Current.LocalFolder.Path);
 
